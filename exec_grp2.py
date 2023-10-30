@@ -15,7 +15,7 @@ else:
     device = torch.device('cpu')
 print(torch.__version__)
 print(device)
-print("downloading virus ...")
+
 # %% [markdown]
 # Model definition
 
@@ -96,9 +96,9 @@ class PreActResNet(nn.Module):
         self.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
         self.layer1 = self._make_layer(block, 32, num_blocks[0], stride=1)
         self.layer2 = self._make_layer(block, 64, num_blocks[1], stride=2)
-        self.layer3 = self._make_layer(block, 128, num_blocks[2], stride=2)
-        self.layer4 = self._make_layer(block, 256, num_blocks[3], stride=2)
-        self.linear = nn.Linear(256*block.expansion, num_classes)
+        self.layer3 = self._make_layer(block, 64, num_blocks[2], stride=2)
+        self.layer4 = self._make_layer(block, 128, num_blocks[3], stride=2)
+        self.linear = nn.Linear(128*block.expansion, num_classes)
         # self.linear = nn.Linear(512*block.expansion, num_classes)
 
     def _make_layer(self, block, planes, num_blocks, stride):
@@ -130,7 +130,7 @@ def test():
     y = net((torch.randn(512,3,32,32)))
     print(y.size())
 
-# test()
+test()
 
 # %% [markdown]
 # Dataloader generation
@@ -174,18 +174,18 @@ np.random.RandomState(seed=seed).shuffle(indices)## modifies the list in place
 
 ## We define the Subset using the generated indices 
 c10train_subset = torch.utils.data.Subset(c10train,indices[:num_samples_subset])
-# print(f"Initial CIFAR10 dataset has {len(c10train)} samples")
-# print(f"Subset of CIFAR10 dataset has {len(c10train_subset)} samples")
+print(f"Initial CIFAR10 dataset has {len(c10train)} samples")
+print(f"Subset of CIFAR10 dataset has {len(c10train_subset)} samples")
 batch_size = 256
 # Finally we can define anoter dataloader for the training data
 trainloader = DataLoader(c10train,batch_size=batch_size,shuffle=True)
 testloader = DataLoader(c10test,batch_size=batch_size) 
 trainloader_subset = DataLoader(c10train_subset,batch_size=batch_size,shuffle=True)
 ### You can now use either trainloader (full CIFAR10) or trainloader_subset (subset of CIFAR10) to train your networks.
-# print("num of train batches",len(trainloader_subset))
-# print("num of test batches",len(testloader))
+print("num of train batches",len(trainloader_subset))
+print("num of test batches",len(testloader))
 x = next(iter(trainloader))
-# print(x[0].shape, x[1].shape)
+print(x[0].shape, x[1].shape)
 
 # %% [markdown]
 # Train function
@@ -259,12 +259,9 @@ def train(model, loader, val_loader,  optimizer, scheduler, loss_fn, n_epochs=1,
 # %%
 # from torchinfo import summary
 model = model_1()
-
-# batch_size = 32
-# print(summary(model, input_size=(batch_size,3,32,32),verbose=0))
 model.to(device)
-
-# %%
+# print(summary(model, input_size=(batch_size,3,32,32),verbose=0))
+print("n_parameters", sum(p.numel() for p in model.parameters() if p.requires_grad))
 optimizer = Adam(model.parameters(), lr=1e-4)
 loss_fn = CrossEntropyLoss()
 scheduler = ReduceLROnPlateau(optimizer, factor=0.5, patience=3, min_lr=1e-8)
@@ -275,8 +272,8 @@ train(
     optimizer,
     scheduler,
     loss_fn,
-    n_epochs=100,
-    plot_losses=True
+    n_epochs=10,
+    plot_losses=False
 )
 
 

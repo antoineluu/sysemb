@@ -275,7 +275,7 @@ train(
     optimizer,
     scheduler,
     loss_fn,
-    n_epochs=10,
+    n_epochs=100,
     plot_losses=True
 )
 
